@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 
 import voucher.management.app.auth.configuration.AWSConfig;
 import voucher.management.app.auth.configuration.VoucherManagementAuthenticationSecurityConfig;
+import voucher.management.app.auth.dto.AuthResponseDTO;
 import voucher.management.app.auth.dto.UserDTO;
 import voucher.management.app.auth.dto.UserRequest;
 import voucher.management.app.auth.entity.User;
@@ -52,6 +53,10 @@ public class UserService implements IUserService  {
 	
 	@Autowired
 	private VoucherManagementAuthenticationSecurityConfig securityConfig;
+	
+
+	@Autowired
+	private JWTService jwtService;
 
 	@Override
 	public Map<Long, List<UserDTO>> findActiveUsers(Pageable pageable) {
@@ -131,12 +136,16 @@ public class UserService implements IUserService  {
 
 
 	@Override
-	public UserDTO loginUser(String email, String password) {
+	public AuthResponseDTO loginUser(String email, String password) {
 		try {
 			User user = userRepository.findByEmailAndStatus(email, true, true);
 			if (user != null && passwordEncoder.matches(password, user.getPassword())) {
 				logger.info("User login is successful.");
-				return DTOMapper.toUserDTO(user);
+				UserDTO userDTO = DTOMapper.toUserDTO(user);
+				String accessToken = jwtService.generateToken(user.getUsername(), user.getEmail(), false);
+				String refreshToken = jwtService.generateToken(user.getUsername(), user.getEmail(), true);
+
+				return DTOMapper.toAuthResponseDTO(userDTO, accessToken, refreshToken);
 			}
 			logger.error("User login is not successful.");
 			throw new UserNotFoundException("Invalid Credentials");

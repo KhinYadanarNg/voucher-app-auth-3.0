@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.data.domain.Pageable;
 
+import voucher.management.app.auth.dto.AuthResponseDTO;
 import voucher.management.app.auth.dto.UserDTO;
 import voucher.management.app.auth.dto.UserRequest;
 import voucher.management.app.auth.entity.User;
@@ -16,7 +17,7 @@ public interface IUserService {
 	 
 	 User findByEmail(String email);
 	 
-	 UserDTO loginUser(String email, String password);
+	 AuthResponseDTO loginUser(String email, String password);
 	 
 	 UserDTO verifyUser(String verificationCode) throws Exception;
 	 

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import voucher.management.app.auth.dto.APIResponse;
+import voucher.management.app.auth.dto.AuthResponseDTO;
 import voucher.management.app.auth.dto.UserDTO;
 import voucher.management.app.auth.dto.UserRequest;
 import voucher.management.app.auth.dto.ValidationResult;
@@ -136,7 +137,7 @@ public class UserController {
 	}
 
 	@PostMapping(value = "/login", produces = "application/json")
-	public ResponseEntity<APIResponse<UserDTO>> loginUser(@RequestBody UserRequest userRequest) {
+	public ResponseEntity<APIResponse<AuthResponseDTO>> loginUser(@RequestBody UserRequest userRequest) {
 		logger.info("Call user login API...");
 		String message = "";
 		String activityType = "Authentication-LoginUser";
@@ -156,9 +157,9 @@ public class UserController {
 						validationResult, activityType, activityDesc, apiEndPoint, httpMethod);
 			}
 
-			UserDTO userDTO = userService.loginUser(userRequest.getEmail(), userRequest.getPassword());
-			message = userDTO.getEmail() + " login successfully";
-			return handleResponseAndsendAuditLogForSuccessCase(userDTO,
+			AuthResponseDTO authResponseDTO = userService.loginUser(userRequest.getEmail(), userRequest.getPassword());
+			message = authResponseDTO.getUser().getEmail() + " login successfully";
+			return handleResponseAndsendAuditLogForSuccessCase(authResponseDTO,
 					activityType, message, apiEndPoint, httpMethod);
 			
 		} catch (Exception e) {
@@ -465,7 +466,7 @@ public class UserController {
 		return validationResult;
 	}
 	
-	private ResponseEntity<APIResponse<UserDTO>> handleResponseAndsendAuditLogForValidationFailure(ValidationResult validationResult, String activityType, String activityDesc, String apiEndPoint, String httpMethod) {
+	private <T> ResponseEntity<APIResponse<T>> handleResponseAndsendAuditLogForValidationFailure(ValidationResult validationResult, String activityType, String activityDesc, String apiEndPoint, String httpMethod) {
 		String message = validationResult.getMessage();
 		logger.error(message);
 		activityDesc = activityDesc.concat(message);
@@ -474,7 +475,7 @@ public class UserController {
 		
 	}
 	
-	private ResponseEntity<APIResponse<UserDTO>> handleResponseAndsendAuditLogForExceptionCase(Exception e, HttpStatusCode htpStatuscode, String activityType, String activityDesc, String apiEndPoint, String httpMethod ) {
+	private <T> ResponseEntity<APIResponse<T>> handleResponseAndsendAuditLogForExceptionCase(Exception e, HttpStatusCode htpStatuscode, String activityType, String activityDesc, String apiEndPoint, String httpMethod ) {
 		String message = e.getMessage();
 		String responseMessage = e instanceof UserNotFoundException ? e.getMessage() : genericErrorMessage;
 		logger.error("Error: " + message);
@@ -488,6 +489,13 @@ public class UserController {
 		HttpStatus httpStatus = HttpStatus.OK;
 		auditLogService.sendAuditLogToSqs(Integer.toString(httpStatus.value()), userDTO.getUserID(), userDTO.getUsername(), activityType, message, apiEndPoint, auditLogResponseSuccess, httpMethod, "");
 		return ResponseEntity.status(httpStatus).body(APIResponse.success(userDTO, message));
+	}
+	
+	private ResponseEntity<APIResponse<AuthResponseDTO>> handleResponseAndsendAuditLogForSuccessCase(AuthResponseDTO authResponseDTO, String activityType, String message, String apiEndPoint, String httpMethod) {
+		logger.info(message);
+		HttpStatus httpStatus = HttpStatus.OK;
+		auditLogService.sendAuditLogToSqs(Integer.toString(httpStatus.value()), authResponseDTO.getUser().getUserID(), authResponseDTO.getUser().getUsername(), activityType, message, apiEndPoint, auditLogResponseSuccess, httpMethod, "");
+		return ResponseEntity.status(httpStatus).body(APIResponse.success(authResponseDTO, message));
 	}
 	
 	private ResponseEntity<APIResponse<List<UserDTO>>> handleResponseListAndsendAuditLogForSuccessCase(List<UserDTO> userDTOList, String activityType, String message, String apiEndPoint, String httpMethod, String userId, String userName, long totalRecord) {
