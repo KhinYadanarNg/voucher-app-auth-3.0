@@ -1,6 +1,5 @@
 package voucher.management.app.auth.dto;
 
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,5 +8,5 @@ import lombok.Setter;
 public class AuthResponseDTO {
 
 	private TokenResponseDTO token;
-    private UserDTO user;
+	private UserDTO user;
 }

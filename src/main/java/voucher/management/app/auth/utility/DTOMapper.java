@@ -1,6 +1,5 @@
 package voucher.management.app.auth.utility;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +13,6 @@ import voucher.management.app.auth.entity.User;
 
 @Component
 public class DTOMapper {
-	
 
 	public static UserDTO toUserDTO(User user) {
 		UserDTO userDTO = new UserDTO();
@@ -26,24 +24,24 @@ public class DTOMapper {
 		userDTO.setVerified(user.isVerified());
 		String[] preferences = user.getPreferences().split(",");
 		if (preferences.length > 0 && !preferences[0].isEmpty()) {
-			 List<String> preferencesArrayList = new ArrayList<String>(Arrays.asList(preferences));
-		    userDTO.setPreferences(preferencesArrayList);
-		} 
+			List<String> preferencesArrayList = new ArrayList<String>(Arrays.asList(preferences));
+			userDTO.setPreferences(preferencesArrayList);
+		}
 		return userDTO;
 	}
-	
+
 	public static AuthResponseDTO toAuthResponseDTO(UserDTO user, TokenResponseDTO token) {
 		AuthResponseDTO authResponseDTO = new AuthResponseDTO();
 		authResponseDTO.setUser(user);
 		authResponseDTO.setToken(token);
-		return authResponseDTO; 
+		return authResponseDTO;
 	}
-	
-	public static TokenResponseDTO toTokenDTO( String accessToken, String refreshToken) {
+
+	public static TokenResponseDTO toTokenDTO(String accessToken, String refreshToken) {
 		TokenResponseDTO tokenResponseDTO = new TokenResponseDTO();
 		tokenResponseDTO.setAccessToken(accessToken);
 		tokenResponseDTO.setRefreshToken(refreshToken);
-		return tokenResponseDTO; 
+		return tokenResponseDTO;
 	}
 
 }
