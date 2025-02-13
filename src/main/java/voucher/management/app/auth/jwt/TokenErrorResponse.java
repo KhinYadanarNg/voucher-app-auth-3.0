@@ -18,9 +18,12 @@ public class TokenErrorResponse {
         Map<String, Object> errorDetails = new HashMap<>();
         ObjectMapper objectMapper = new ObjectMapper();
 
-        errorDetails.put("error", error);
+        errorDetails.put("success", false);
         errorDetails.put("message", message);
+        errorDetails.put("totalRecord", 0);
+        errorDetails.put("data", null);
         errorDetails.put("status", status);
+        errorDetails.put("error", error);
 
         response.getWriter().write(objectMapper.writeValueAsString(errorDetails));
     }
