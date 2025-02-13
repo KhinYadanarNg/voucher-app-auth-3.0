@@ -147,8 +147,8 @@ public class UserService implements IUserService  {
 				UserDTO userDTO = DTOMapper.toUserDTO(user);
 				String accessToken = jwtService.generateToken(user.getUsername(), user.getEmail(), false);
 				String refreshToken = jwtService.generateToken(user.getUsername(), user.getEmail(), true);
-
-				return DTOMapper.toAuthResponseDTO(userDTO, accessToken, refreshToken);
+				TokenResponseDTO tokenResponseDTO = DTOMapper.toTokenDTO(accessToken, refreshToken);
+				return DTOMapper.toAuthResponseDTO(userDTO, tokenResponseDTO);
 			}
 			logger.error("User login is not successful.");
 			throw new UserNotFoundException("Invalid Credentials");

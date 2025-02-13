@@ -8,8 +8,6 @@ import lombok.Setter;
 @Setter
 public class AuthResponseDTO {
 
-	private String accessToken;
-    private String refreshToken;
-    private String tokenType = "Bearer";
+	private TokenResponseDTO token;
     private UserDTO user;
 }

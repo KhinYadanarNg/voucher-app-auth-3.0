@@ -32,11 +32,10 @@ public class DTOMapper {
 		return userDTO;
 	}
 	
-	public static AuthResponseDTO toAuthResponseDTO(UserDTO userDTO, String accessToken, String refreshToken) {
+	public static AuthResponseDTO toAuthResponseDTO(UserDTO user, TokenResponseDTO token) {
 		AuthResponseDTO authResponseDTO = new AuthResponseDTO();
-		authResponseDTO.setAccessToken(accessToken);
-		authResponseDTO.setRefreshToken(refreshToken);
-		authResponseDTO.setUser(userDTO);
+		authResponseDTO.setUser(user);
+		authResponseDTO.setToken(token);
 		return authResponseDTO; 
 	}
 	
