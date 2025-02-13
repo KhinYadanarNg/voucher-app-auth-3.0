@@ -1,7 +1,10 @@
+
+
 package voucher.management.app.auth.configuration;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,10 +17,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.HstsHeaderWriter;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 import org.springframework.web.cors.CorsConfiguration;
+
+import voucher.management.app.auth.jwt.CustomAccessDeniedHandler;
+import voucher.management.app.auth.jwt.CustomAuthenticationEntryPoint;
+import voucher.management.app.auth.jwt.JwtFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -36,6 +44,15 @@ public class VoucherManagementAuthenticationSecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+	
+	@Autowired 
+	private JwtFilter jwtFilter;
+	
+	@Autowired 
+	private CustomAuthenticationEntryPoint authenticationEntryPoint;
+	
+	@Autowired 
+	private CustomAccessDeniedHandler accessDeniedHandler;
 
 	private static final String[] SECURED_URLS = { "/api/**" };
 
@@ -59,7 +76,14 @@ public class VoucherManagementAuthenticationSecurityConfig {
 				})).csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(
 						auth -> auth.requestMatchers(SECURED_URLS).permitAll().anyRequest().authenticated())
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+				.exceptionHandling(exceptionHandling -> exceptionHandling
+						.accessDeniedHandler(accessDeniedHandler)
+		                .authenticationEntryPoint(authenticationEntryPoint)
+		           
+		            )
+				.build();
 	}
 
 	@Bean
