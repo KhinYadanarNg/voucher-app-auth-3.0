@@ -38,5 +38,5 @@ public interface IUserService {
 	 
 	 UserDTO updatePreferencesByUser(String userId, List<String> preferences) throws Exception;
 	 
-	 TokenResponseDTO refreshToken(String token);
+	 TokenResponseDTO refreshToken(String userName, String email);
 }
