@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import voucher.management.app.auth.dto.AuthResponseDTO;
+import voucher.management.app.auth.dto.TokenResponseDTO;
 import voucher.management.app.auth.dto.UserDTO;
 import voucher.management.app.auth.entity.User;
 
@@ -37,6 +38,13 @@ public class DTOMapper {
 		authResponseDTO.setRefreshToken(refreshToken);
 		authResponseDTO.setUser(userDTO);
 		return authResponseDTO; 
+	}
+	
+	public static TokenResponseDTO toTokenDTO( String accessToken, String refreshToken) {
+		TokenResponseDTO tokenResponseDTO = new TokenResponseDTO();
+		tokenResponseDTO.setAccessToken(accessToken);
+		tokenResponseDTO.setRefreshToken(refreshToken);
+		return tokenResponseDTO; 
 	}
 
 }

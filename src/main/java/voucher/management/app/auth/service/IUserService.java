@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.data.domain.Pageable;
 
 import voucher.management.app.auth.dto.AuthResponseDTO;
+import voucher.management.app.auth.dto.TokenResponseDTO;
 import voucher.management.app.auth.dto.UserDTO;
 import voucher.management.app.auth.dto.UserRequest;
 import voucher.management.app.auth.entity.User;
@@ -36,4 +37,6 @@ public interface IUserService {
 	 User findByUserId(String userId);
 	 
 	 UserDTO updatePreferencesByUser(String userId, List<String> preferences) throws Exception;
+	 
+	 TokenResponseDTO refreshToken(String token);
 }

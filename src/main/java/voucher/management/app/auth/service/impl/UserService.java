@@ -18,11 +18,14 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 
+import io.jsonwebtoken.Claims;
+
 import org.springframework.data.domain.Page;
 
 import voucher.management.app.auth.configuration.AWSConfig;
 import voucher.management.app.auth.configuration.VoucherManagementAuthenticationSecurityConfig;
 import voucher.management.app.auth.dto.AuthResponseDTO;
+import voucher.management.app.auth.dto.TokenResponseDTO;
 import voucher.management.app.auth.dto.UserDTO;
 import voucher.management.app.auth.dto.UserRequest;
 import voucher.management.app.auth.entity.User;
@@ -54,9 +57,9 @@ public class UserService implements IUserService  {
 	@Autowired
 	private VoucherManagementAuthenticationSecurityConfig securityConfig;
 	
-
 	@Autowired
 	private JWTService jwtService;
+	
 
 	@Override
 	public Map<Long, List<UserDTO>> findActiveUsers(Pageable pageable) {
@@ -401,6 +404,22 @@ public class UserService implements IUserService  {
 			e.printStackTrace();
 			throw e;
 
+		}
+	}
+	
+	@Override
+	public TokenResponseDTO refreshToken(String token) {
+		try {
+			Claims claims = jwtService.extractAllClaims(token);
+			String email = claims.getSubject();
+			String userName = claims.get("userName", String.class);
+			String accessToken = jwtService.generateToken(userName, email, true);
+			String refreshToken = jwtService.generateToken(userName, email, false);
+			return DTOMapper.toTokenDTO(accessToken, refreshToken);
+		} catch (Exception e) {
+			logger.error("Error occurred while user deleting preferences, " + e.toString());
+			e.printStackTrace();
+			throw e;
 		}
 	}
 

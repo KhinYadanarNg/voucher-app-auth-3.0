@@ -24,8 +24,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
 import voucher.management.app.auth.dto.APIResponse;
 import voucher.management.app.auth.dto.AuthResponseDTO;
+import voucher.management.app.auth.dto.TokenResponseDTO;
 import voucher.management.app.auth.dto.UserDTO;
 import voucher.management.app.auth.dto.UserRequest;
 import voucher.management.app.auth.dto.ValidationResult;
@@ -34,6 +36,7 @@ import voucher.management.app.auth.enums.AuditLogInvalidUser;
 import voucher.management.app.auth.enums.AuditLogResponseStatus;
 import voucher.management.app.auth.exception.UserNotFoundException;
 import voucher.management.app.auth.service.impl.AuditLogService;
+import voucher.management.app.auth.service.impl.JWTService;
 import voucher.management.app.auth.service.impl.UserService;
 import voucher.management.app.auth.strategy.impl.UserValidationStrategy;
 import voucher.management.app.auth.utility.DTOMapper;
@@ -55,6 +58,9 @@ public class UserController {
 	
 	@Autowired
 	private AuditLogService auditLogService;
+	
+	@Autowired
+	private JWTService jwtService;
 	
 	private String auditLogResponseSuccess = AuditLogResponseStatus.SUCCESS.toString();
 	private String auditLogResponseFailure = AuditLogResponseStatus.FAILED.toString();
@@ -451,10 +457,36 @@ public class UserController {
 		   return handleResponseAndsendAuditLogForExceptionCase(e,
 				   HttpStatus.INTERNAL_SERVER_ERROR, activityType, activityDesc, apiEndPoint, httpMethod);
 		}
-
 	}
 	
-	
+	@PostMapping("/refreshToken")
+	public ResponseEntity<APIResponse<TokenResponseDTO>> refreshToken(HttpServletRequest request) {
+		String authorizationHeader = request.getHeader("Authorization");
+		String message = "";
+
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			String refreshToken = authorizationHeader.substring(7);
+			logger.info(refreshToken);
+			try {
+				TokenResponseDTO tokenResponseDTO = userService.refreshToken(refreshToken);
+			    message = "Token is generated successfully.";
+				logger.info(message);
+				return ResponseEntity.status(HttpStatus.OK).body(APIResponse.success(tokenResponseDTO, message));
+
+			} catch (Exception e) {
+				message = e.getMessage();
+				logger.error(message);
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(APIResponse.error(message));
+
+			}
+
+		} else {
+			message = "Invalid Token";
+			logger.error(message);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.error(message));
+
+		}
+	}
 
 	
 	private ValidationResult validateObjectByUseId(String userID, String id) {
