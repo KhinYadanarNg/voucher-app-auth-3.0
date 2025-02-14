@@ -6,6 +6,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import voucher.management.app.auth.entity.User;
+import voucher.management.app.auth.enums.AuditLogInvalidUser;
+import voucher.management.app.auth.enums.AuditLogResponseStatus;
+import voucher.management.app.auth.service.impl.AuditLogService;
 import voucher.management.app.auth.service.impl.JWTService;
 import voucher.management.app.auth.service.impl.UserService;
 
@@ -28,11 +31,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	@Autowired
 	ApplicationContext context;
+	
+	@Autowired
+	private AuditLogService auditLogService;
+	
+	private String userID;
+	private String apiEndpoint;
+	private String httpMethod;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		String authHeader = request.getHeader("Authorization");
+	    userID = request.getHeader("X-User-Id");
+	    apiEndpoint = request.getRequestURI();
+	    httpMethod = request.getMethod();
 
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			filterChain.doFilter(request, response);
@@ -76,6 +89,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	}
 
 	private void handleException(HttpServletResponse response, String message, int status) throws IOException {
-		TokenErrorResponse.sendErrorResponse(response, message, HttpServletResponse.SC_UNAUTHORIZED, "UnAuthorized");
+		TokenErrorResponse.sendErrorResponse(response, message, status, "UnAuthorized");
+		auditLogService.sendAuditLogToSqs(Integer.toString(status), userID, AuditLogInvalidUser.InvalidUserName.toString(), "", message, apiEndpoint, AuditLogResponseStatus.FAILED.toString(), httpMethod, message);
 	}
 }
