@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -42,6 +43,20 @@ public class JwtFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+		
+//		 Optional<String> refreshTokenOpt = CookieUtils.getCookieValue(request, "refresh_token");
+//		 Optional<String> accessTokenOpt = CookieUtils.getCookieValue(request, "access_token");
+//		 String refreshToken = "";
+//		 String accessToken = "";
+//		 
+//		 if (accessTokenOpt.isPresent()) {
+//			 accessToken = accessTokenOpt.get();
+//		 }
+//		 
+//		 if (refreshTokenOpt.isPresent()) {
+//             refreshToken = refreshTokenOpt.get();
+//	 }
+		
 		String authHeader = request.getHeader("Authorization");
 	    userID = request.getHeader("X-User-Id");
 	    apiEndpoint = request.getRequestURI();
